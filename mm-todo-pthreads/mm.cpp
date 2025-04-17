@@ -62,13 +62,37 @@ double** MatrixMultiply(double** const a, double** const b, int n, int t)
   // For starters, just execute using the main thread, nothing
   // in parallel:
   //
-  struct ThreadInfo* info;
-  info = new ThreadInfo(0 /*id*/, 
-                        1 /*num threads*/, 
-                        n /*matrix size*/,
-                        a, b, c);
 
-  mm(info);
+  // THEO MAURINO CODE
+  pthread_t* threads = new pthread_t[t]; // t must be a measurement of length? been a while for c++
+  for (int i = 0; i < t; i++) {
+    struct ThreadInfo* info;
+    info = new ThreadInfo(
+      i,  //id
+      t,
+      n,
+      a, b, c
+    );
+    pthread_create(&threads[i], nullptr, mm, (void*) info);
+  }
+
+
+ // ENDS THEO MAURINO CODE
+
+ // comments out below because we're no longer doing single-threading
+
+  // struct ThreadInfo* info;
+  // info = new ThreadInfo(0 /*id*/, 
+  //                       1 /*num threads*/, 
+  //                       n /*matrix size*/,
+  //                       a, b, c);
+
+  for (int i = 0; i < t; i++) {
+    pthread_join([i], nullptr); // wait for threads to finish, nullptr means ignore return value
+  }
+
+  delete[] threads; // clean up the array we made
+  // mm(info);
 
   //
   // NOTE: mm() will delete the info object as part of the cleanup.
